@@ -30,7 +30,7 @@ public class DiscordBot {
     intents.add(GatewayIntent.MESSAGE_CONTENT);
 
     // Build bot object
-    JDA bot = JDABuilder.createDefault("MTE3MjMyODU3NTI5OTQ4NTc4Ng.G4vfXY.VxGmAE-76rtMA0RG6UmyaKjJyi1T-8MrZa7j7E")
+    JDA bot = JDABuilder.createDefault("MTE3MjMyODU3NTI5OTQ4NTc4Ng.Gp3QUe.o5pr8BZIg0oMs1cu_xbaCy1Qt3xQ4Bz7oBA8J4")
             .setActivity(Activity.watching("Test"))
             .addEventListeners(new EchoCommand(ss))
             .addEventListeners(new WordleCommand(ss))

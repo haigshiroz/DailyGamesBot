@@ -65,7 +65,12 @@ public class ScoreGetter implements IGameVisitor<String> {
 
   @Override
   public String visitMurdle(String score) {
-    return "Murdle Score";
+    // Line 4 (index 3) describes the person, weapon, setting, and time.
+    // Line 5 (index 4) is the accuracy of the person, weapon, and setting and the time.
+    // Line 7 (index 6) describes the streak.
+    // Line 8 (index 7) is the streak.
+    String[] scoreSplit = score.split("\n");
+    return scoreSplit[3] + "\n" + scoreSplit[4] + "\n" +scoreSplit[6] + "\n" +scoreSplit[7];
   }
 
   private boolean IsStringInteger(String str) {

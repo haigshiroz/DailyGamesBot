@@ -32,6 +32,8 @@ public class DateGetter implements IGameVisitor<String> {
 
   @Override
   public String visitMurdle(String score) {
-    return "Murdle Date";
+    // Date is the second line starting at index 11 (After "Murdle for ").
+    String[] scoreSplit = score.split("\n");
+    return scoreSplit[1].substring(11);
   }
 }
