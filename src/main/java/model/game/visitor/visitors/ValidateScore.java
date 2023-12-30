@@ -3,6 +3,11 @@ package model.game.visitor.visitors;
 public class ValidateScore implements IGameVisitor<Boolean> {
   @Override
   public Boolean visitWordle(String score) {
+    if (score == null) {
+      // Given String must not be null.
+      return false;
+    }
+
     // Split the score string by each individual line
     String[] splitString = score.split("\n");
 
@@ -119,6 +124,11 @@ public class ValidateScore implements IGameVisitor<Boolean> {
 
   @Override
   public Boolean visitConnections(String score) {
+    if (score == null) {
+      // Given String must not be null.
+      return false;
+    }
+
     // Split the score string by each individual line
     String[] splitString = score.split("\n");
 
@@ -197,6 +207,11 @@ public class ValidateScore implements IGameVisitor<Boolean> {
 
   @Override
   public Boolean visitMini(String score, boolean isLink) {
+    if (score == null) {
+      // Given String must not be null.
+      return false;
+    }
+
     if (isLink) {
       return this.validateMiniLink(score);
     } else {
@@ -312,6 +327,11 @@ public class ValidateScore implements IGameVisitor<Boolean> {
 
   @Override
   public Boolean visitMurdle(String score) {
+    if (score == null) {
+      // Given String must not be null.
+      return false;
+    }
+
     boolean valid = true;
     // Layout:
     // First line: title, all caps.
@@ -325,17 +345,31 @@ public class ValidateScore implements IGameVisitor<Boolean> {
     // Ninth-Eleventh lines empty.
     // Twelfth line https://murdle.com.
     String[] scoreSplit = score.split("\n");
+    // Number of lines offset between the two types of Murdle answers (hint versus no hint).
+    int offset = 0;
+    if (scoreSplit.length == 14) {
+      // Hints were used.
+      offset = 2;
+    } else if (scoreSplit.length != 12) {
+      // Invalid number of lines.
+      valid = false;
+    }
 
-    // Check all the empty rows first. Third, Sixth, Ninth, Tenth, and Eleventh lines are empty.
-    // Indexes are 2, 5, 8, 9, 10.
-    int[] emptyLines = {2, 5, 8, 9, 10};
-    for (int ind : emptyLines) {
-      // For every empty line index, if the message is still valid, check if the line is empty.
-      // Else, break since the message is invalid.
-      valid = scoreSplit[ind].isEmpty();
-
-      if(!valid) {
-        break;
+    if (valid) {
+      // Check all the empty rows first.
+      // Indexes are 2, 5, 8, 9, 10 for no hint and 2, 5, 7, 10, 11, 12 for hints.
+      // If a hint was used, there is an extra empty line.
+      // This extra line is accounted for in indexing 5 and 5 + offset.
+      // If the hint was used, the index offset of 0 will just check the same line.
+      // Else, it will just index the same line twice.
+      int[] emptyLines = {2, 5, 5 + offset, 8 + offset, 9 + offset, 10 + offset};
+      for (int ind : emptyLines) {
+        // For every empty line index, if the message is still valid, check if the line is empty.
+        // Else, break since the message is invalid.
+        valid = scoreSplit[ind].isEmpty();
+        if (!valid) {
+          break;
+        }
       }
     }
 
@@ -354,39 +388,62 @@ public class ValidateScore implements IGameVisitor<Boolean> {
       valid = this.murdleValidSecondLine(scoreSplit[1]);
     }
 
-    // Fourth line should be Silhouette, Knife, House, five spaces, Clock.
+    // Fourth line should be Silhouette, Knife, House, (Optional) Question Mark, five spaces, Clock.
     if (valid) {
-      String expectedFourthLine = "\uD83D\uDC64\uD83D\uDD2A\uD83C\uDFE1     \uD83D\uDD70\uFE0F";
-      valid = scoreSplit[3].compareTo(expectedFourthLine) == 0;
+      String expectedFourthLine1 = "\uD83D\uDC64\uD83D\uDD2A\uD83C\uDFE1     \uD83D\uDD70\uFE0F";
+      String expectedFourthLine2 = "\uD83D\uDC64\uD83D\uDD2A\uD83C\uDFE1\u2753     \uD83D\uDD70\uFE0F";
+      valid = (scoreSplit[3].compareTo(expectedFourthLine1) == 0) ||
+              (scoreSplit[3].compareTo(expectedFourthLine2) == 0);
     }
 
-    // Fifth line is 3 emojis that are either check of x, five spaces, then the time.
+    // Fifth line is 3-4 emojis that are either check or x, five spaces, then the time.
     // Time is any number of emojis 0-9, ":", then two emojis 0-9.
     if (valid) {
       valid = this.murdleValidFifthLine(scoreSplit[4]);
     }
 
-    // Seventh line should be Scale emoji.
+    // Check hints if valid.
+    // Hints are the seventh line consisting of any positive number of crystal ball emojis ("\uD83D\uDD2E").
+    if (valid && offset == 2) {
+      String seventhLine = scoreSplit[6];
+      // Since the unicode for the crystal ball emoji is two single strings, the line length
+      // must be a multiple of two.
+      if (seventhLine.isEmpty() || seventhLine.length() % 2 != 0) {
+        valid = false;
+      } else {
+        // Every two single strings should make up the magic ball emoji unicode.
+        for (int strInd = 0; strInd < seventhLine.length(); strInd += 2) {
+          if (seventhLine.substring(strInd, strInd + 2).compareTo("\uD83D\uDD2E") != 0) {
+            valid = false;
+            break;
+          }
+        }
+      }
+    }
+
+    // Seventh (no hint)/Ninth (hint) line should be Scale emoji.
     if (valid) {
-      if (scoreSplit[6].compareTo("⚖\uFE0F") != 0) {
+      if (scoreSplit[6 + offset].compareTo("\u2696\uFE0F") != 0) {
         valid = false;
       }
     }
 
-    // Eighth line is String of emojis.
+    // Eighth (no hint)/Tenth (hint) line is String of emojis.
     // Can't check eighth line too thoroughly.
     if (valid) {
-      if (scoreSplit[7].contains(" ")) {
+      if (scoreSplit[7 + offset].contains(" ")) {
         valid = false;
       }
     }
 
-    // Eleventh line should be "https://murdle.com/" or "https://murdle.com".
+    // Twelfth (no hint)/Fourteenth (hint) line should be "https://murdle.com/" or "https://murdle.com".
     if (valid) {
-      if (!scoreSplit[11].equals("https://murdle.com/") && !scoreSplit[11].equals("https://murdle.com")) {
+      if (!scoreSplit[11 + offset].equals("https://murdle.com/")
+              && !scoreSplit[11 + offset].equals("https://murdle.com")) {
         valid = false;
       }
     }
+    System.out.println(valid);
 
 
     return valid;
@@ -432,64 +489,76 @@ public class ValidateScore implements IGameVisitor<Boolean> {
 
   private boolean murdleValidFifthLine(String fifthLine) {
     boolean valid = true;
-
-    // Fifth line is 3 emojis that are either check of x, five spaces, then the time.
+    // Fifth line is 3-4 emojis that are either check or x, five spaces, then the time.
     // Time is any number of emojis 0-9, ":", then two emojis 0-9.
-    if (fifthLine.length() < 12) {
-      // Minimum length must be 12 (three emojis, five spaces, emoji, :, two emojis).
+    if (fifthLine.length() < 13) {
+      // Minimum length must be 12 (three-four emojis, five spaces, emoji, :, two emojis).
       valid = false;
     } else {
-      String firstThird = fifthLine.substring(0, 3);
-      String secondThird = fifthLine.substring(3, 8);
-      String thirdThird = fifthLine.substring(8);
-
-      boolean firstValid = true;
-      for (String s : firstThird.split("")) {
-        if (!s.equals("\u2705") && !s.equals("\u274C")) {
-          // First segment must contain only green check or red x emoji.
-          firstValid = false;
+      // Find where the first space begins.
+      int indOfSpace = -1;
+      for (int strInd = 0; strInd < fifthLine.length(); strInd++) {
+        if (fifthLine.charAt(strInd) == ' ') {
+          indOfSpace = strInd;
           break;
         }
       }
-
-      // Second segment is five spaces.
-      boolean secondValid = secondThird.equals("     ");
-
-      // Third segment is any positive amount of number emojis, ":", then two number emojis.
-      boolean thirdValid = true;
-      String[] thirdSplit = thirdThird.split(":");
-      if (thirdSplit.length != 2) {
-        // Third is numbers, ":", numbers.
-        thirdValid = false;
+      if (indOfSpace != 3 && indOfSpace != 4) {
+        valid = false;
       } else {
-        // First segment should be positive length, second segment should be of length 2.
-        // Since number emojis are a number + \uFE0F +  ⃣ , the length is 3 for each emoji.
-        // Thus, the first segment must be a positive multiple of 3 and the second should
-        // be of length 6.
-        if (thirdSplit[0].isEmpty() || (thirdSplit[0].length() % 3) != 0 || thirdSplit[1].length() != 6) {
-          thirdValid = false;
-        }
-      }
-      // Given that so far the third line is the right size, check if the String is only number
-      // emojis.
-      if (thirdValid) {
-        // Third segment without ":".
-        String thirdCombined = thirdSplit[0] + thirdSplit[1];
 
-        // Go by 3's since each number emoji is strings of length of three.
-        for (int strInd = 0; strInd < thirdCombined.length(); strInd += 3) {
-          String tempStr = thirdCombined.substring(strInd, strInd + 3);
-          if(!(this.IsStringInteger(tempStr.substring(0, 1)) && tempStr.substring(1).compareTo("\uFE0F\u20E3") == 0)) {
-            // Each group of three single Strings must be a number emoji.
-            thirdValid = false;
+        String firstThird = fifthLine.substring(0, indOfSpace);
+        String secondThird = fifthLine.substring(indOfSpace, indOfSpace + 5);
+        String thirdThird = fifthLine.substring(indOfSpace + 5);
+
+        boolean firstValid = true;
+        for (String s : firstThird.split("")) {
+          if (!s.equals("\u2705") && !s.equals("\u274C")) {
+            // First segment must contain only green check or red x emoji.
+            firstValid = false;
             break;
           }
         }
-      }
 
-      if (!(firstValid && secondValid && thirdValid)) {
-        // If all three parts of the fifth line are not valid, the validity is false.
-        valid = false;
+        // Second segment is five spaces.
+        boolean secondValid = secondThird.equals("     ");
+
+        // Third segment is any positive amount of number emojis, ":", then two number emojis.
+        boolean thirdValid = true;
+        String[] thirdSplit = thirdThird.split(":");
+        if (thirdSplit.length != 2) {
+          // Third is numbers, ":", numbers.
+          thirdValid = false;
+        } else {
+          // First segment should be positive length, second segment should be of length 2.
+          // Since number emojis are a number + \uFE0F +  ⃣ , the length is 3 for each emoji.
+          // Thus, the first segment must be a positive multiple of 3 and the second should
+          // be of length 6.
+          if (thirdSplit[0].isEmpty() || (thirdSplit[0].length() % 3) != 0 || thirdSplit[1].length() != 6) {
+            thirdValid = false;
+          }
+        }
+        // Given that so far the third line is the right size, check if the String is only number
+        // emojis.
+        if (thirdValid) {
+          // Third segment without ":".
+          String thirdCombined = thirdSplit[0] + thirdSplit[1];
+
+          // Go by 3's since each number emoji is strings of length of three.
+          for (int strInd = 0; strInd < thirdCombined.length(); strInd += 3) {
+            String tempStr = thirdCombined.substring(strInd, strInd + 3);
+            if (!(this.IsStringInteger(tempStr.substring(0, 1)) && tempStr.substring(1).compareTo("\uFE0F\u20E3") == 0)) {
+              // Each group of three single Strings must be a number emoji.
+              thirdValid = false;
+              break;
+            }
+          }
+        }
+
+        if (!(firstValid && secondValid && thirdValid)) {
+          // If all three parts of the fifth line are not valid, the validity is false.
+          valid = false;
+        }
       }
     }
 

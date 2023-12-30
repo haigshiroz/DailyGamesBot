@@ -46,9 +46,9 @@ public class ScoreGetter implements IGameVisitor<String> {
       String timeAndAfter = score.substring(62);
       String time = "";
       // Loop for every single string at the time. Once a non-integer is reached, break.
-      for(int strInd = 0; true; strInd++) {
+      for (int strInd = 0; true; strInd++) {
         String str = timeAndAfter.substring(strInd, strInd + 1);
-        if(this.IsStringInteger(str)) {
+        if (this.IsStringInteger(str)) {
           time += str;
         } else {
           break;
@@ -59,7 +59,7 @@ public class ScoreGetter implements IGameVisitor<String> {
     } else {
       String[] splitScore = score.split(" ");
       String time = splitScore[10];
-      return time.substring(0, time.length()-1);
+      return time.substring(0, time.length() - 1);
     }
   }
 
@@ -67,10 +67,19 @@ public class ScoreGetter implements IGameVisitor<String> {
   public String visitMurdle(String score) {
     // Line 4 (index 3) describes the person, weapon, setting, and time.
     // Line 5 (index 4) is the accuracy of the person, weapon, and setting and the time.
-    // Line 7 (index 6) describes the streak.
-    // Line 8 (index 7) is the streak.
+    // Line 7 (index 6) is how many hints were used. If none, the line and the line before is not present.
+    // Line 7 (index 6) (no hint) or Line 9 (index 8) (hint) describes the streak.
+    // Line 8 (index 7) (no hint) or Line 10 (index 9) (hint) is the streak.
     String[] scoreSplit = score.split("\n");
-    return scoreSplit[3] + "\n" + scoreSplit[4] + "\n" +scoreSplit[6] + "\n" +scoreSplit[7];
+    String ret = "";
+    if (scoreSplit.length == 12) {
+      // No hint used
+      ret += scoreSplit[3] + "\n" + scoreSplit[4] + "\n" + scoreSplit[6] + "\n" + scoreSplit[7];
+    } else {
+      // Hint was used
+      ret += scoreSplit[3] + "\n" + scoreSplit[4] + "\n" + scoreSplit[6] + "\n" + scoreSplit[8] + "\n" + scoreSplit[9];
+    }
+    return ret;
   }
 
   private boolean IsStringInteger(String str) {
