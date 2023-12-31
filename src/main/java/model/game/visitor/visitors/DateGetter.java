@@ -1,6 +1,8 @@
 package model.game.visitor.visitors;
 
+import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
@@ -8,9 +10,9 @@ import java.util.GregorianCalendar;
  * submitted, assuming that the game is already validated.
  * Dates follow the pattern of MM/DD/YYYY.
  */
-public class DateGetter implements IGameVisitor<String> {
+public class DateGetter implements IGameVisitor<Date> {
   @Override
-  public String visitWordle(String score) {
+  public Date visitWordle(String score) {
     // Split the score string by each space
     String[] splitString = score.split(" ");
     // Day is the second term in the first line of wordle score.
@@ -21,15 +23,12 @@ public class DateGetter implements IGameVisitor<String> {
     // Add the number of days to the calendar and return the new date.
     cal.add(Calendar.DATE, wordleDay);
 
-    int month = cal.get(Calendar.MONTH) + 1; // Month is 0 based index.
-    int day = cal.get(Calendar.DATE); // Day is 1 based index.
-    int year = cal.get(Calendar.YEAR);
-
-    return month + "/" + day + "/" + year;
+    //DateFormat.getDateInstance(DateFormat.LONG).format(cal.getTime());
+    return cal.getTime();
   }
 
   @Override
-  public String visitConnections(String score) {
+  public Date visitConnections(String score) {
     // Split the score string by each individual line
     String[] splitString = score.split("\n");
     // Day is the third term in the second line of connections score, remove the #.
@@ -41,35 +40,46 @@ public class DateGetter implements IGameVisitor<String> {
     // Subtract 1 since "Game 1" was June 12, 2023.
     cal.add(Calendar.DATE, connectionsDay - 1);
 
-    int month = cal.get(Calendar.MONTH) + 1; // Month is 0 based index.
-    int day = cal.get(Calendar.DATE); // Day is 1 based index.
-    int year = cal.get(Calendar.YEAR);
-
-    return month + "/" + day + "/" + year;
+    return cal.getTime();
   }
 
   @Override
-  public String visitMini(String score, boolean isLink) {
+  public Date visitMini(String score, boolean isLink) {
+    Date returnDate;
+
     if (isLink) {
       // Date is the 49th-59th indexes, YYYY-MM-DD.
-      String year = score.substring(49, 53);
-      String month = score.substring(54, 56);
-      String date = score.substring(57, 59);
-      return month + "/" + date + "/" + year;
+      int year = Integer.parseInt(score.substring(49, 53));
+      int month = Integer.parseInt(score.substring(54, 56));
+      int date = Integer.parseInt(score.substring(57, 59));
+      Calendar cal = new GregorianCalendar(year, month-1, date);
+      returnDate = cal.getTime();
 
     } else {
       // Date is the fourth term is the score.
       // Follows MM/DD/YYYY.
       String[] splitScore = score.split(" ");
-      return splitScore[3];
+      String dateString = splitScore[3];
+      int month = Integer.parseInt(dateString.substring(0, 2));
+      int date = Integer.parseInt(dateString.substring(3, 5));
+      int year = Integer.parseInt(dateString.substring(6));
+      Calendar cal = new GregorianCalendar(year, month-1, date);
+      returnDate = cal.getTime();
     }
+
+    return returnDate;
   }
 
   @Override
-  public String visitMurdle(String score) {
+  public Date visitMurdle(String score) {
     // Date is the second line starting at index 11 (After "Murdle for ").
     // Follows MM/DD/YYYY.
     String[] scoreSplit = score.split("\n");
-    return scoreSplit[1].substring(11);
+    String dateString = scoreSplit[1].substring(11);
+    int month = Integer.parseInt(dateString.substring(0, 2));
+    int date = Integer.parseInt(dateString.substring(3, 5));
+    int year = Integer.parseInt(dateString.substring(6));
+    Calendar cal = new GregorianCalendar(year, month-1, date);
+    return cal.getTime();
   }
 }

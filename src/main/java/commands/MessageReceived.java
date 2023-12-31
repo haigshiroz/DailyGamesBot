@@ -4,6 +4,8 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+import java.util.Date;
+
 import model.ServerSettings;
 import model.game.visitor.games.Connections;
 import model.game.visitor.games.IGame;
@@ -55,20 +57,14 @@ public class MessageReceived extends ListenerAdapter {
         return;
       }
 
-      System.out.println(gameNameString);
-      whereToMessage.sendMessage(gameNameString).queue();
-
       // If it's not a valid score, skip
       if (!game.accept(new ValidateScore())) {
         return;
       }
-      String date = game.accept(new DateGetter());
+      Date date = game.accept(new DateGetter());
       String score = game.accept(new ScoreGetter());
       whereToMessage.sendMessage("Game: " + gameNameString + "\nDate: "
               + date + "\nScore:\n" + score).queue();
-
-
-      System.out.println("Message: " + msg);
     }
   }
 }
