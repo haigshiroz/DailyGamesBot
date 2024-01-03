@@ -14,6 +14,7 @@ import commands.MessageReceived;
 import commands.StoreGameChannelCommand;
 import commands.WordleCommand;
 import model.ServerSettings;
+import model.game.data.FirebaseInitializer;
 
 /**
  * Main class holder.
@@ -54,5 +55,9 @@ public class DiscordBot {
     for(Guild s : bot.awaitReady().getGuilds()) {
       ss.addServer(s);
     }
+
+
+    FirebaseInitializer fbi = new FirebaseInitializer();
+    fbi.initialize();
   }
 }

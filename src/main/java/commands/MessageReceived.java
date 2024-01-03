@@ -1,12 +1,15 @@
 package commands;
 
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 
 import model.ServerSettings;
+import model.game.data.FirebaseService;
 import model.game.visitor.games.Connections;
 import model.game.visitor.games.IGame;
 import model.game.visitor.games.Mini;
@@ -63,6 +66,15 @@ public class MessageReceived extends ListenerAdapter {
       }
       Date date = game.accept(new DateGetter());
       String score = game.accept(new ScoreGetter());
+      User player = event.getAuthor();
+
+      FirebaseService fbs = new FirebaseService();
+      try {
+        fbs.saveScore(score, player, gameNameString, date);
+      } catch (ExecutionException | InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+
       whereToMessage.sendMessage("Game: " + gameNameString + "\nDate: "
               + date + "\nScore:\n" + score).queue();
     }
