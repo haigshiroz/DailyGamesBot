@@ -75,10 +75,10 @@ public class DateGetter implements IGameVisitor<Date> {
     // Date is the second line starting at index 11 (After "Murdle for ").
     // Follows MM/DD/YYYY.
     String[] scoreSplit = score.split("\n");
-    String dateString = scoreSplit[1].substring(11);
-    int month = Integer.parseInt(dateString.substring(0, 2));
-    int date = Integer.parseInt(dateString.substring(3, 5));
-    int year = Integer.parseInt(dateString.substring(6));
+    String[] dateStringSplit = scoreSplit[1].substring(11).split("/");
+    int month = Integer.parseInt(dateStringSplit[0]);
+    int date = Integer.parseInt(dateStringSplit[1]);
+    int year = Integer.parseInt(dateStringSplit[2]);
     Calendar cal = new GregorianCalendar(year, month-1, date);
     return cal.getTime();
   }

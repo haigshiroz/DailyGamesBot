@@ -6,13 +6,15 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import commands.EchoCommand;
+import commands.CompareCommand;
 import commands.MessageReceived;
 import commands.StoreGameChannelCommand;
-import commands.WordleCommand;
 import model.ServerSettings;
 import model.game.data.FirebaseInitializer;
 
@@ -22,42 +24,43 @@ import model.game.data.FirebaseInitializer;
 public class DiscordBot {
   /**
    * Main Class.
+   *
    * @param args String arguments.
    */
   public static void main(String[] args) throws InterruptedException {
+    FirebaseInitializer fbi = new FirebaseInitializer();
+    fbi.initialize();
+
     // Server Settings
     ServerSettings ss = new ServerSettings();
     Collection<GatewayIntent> intents = new ArrayList<>();
     intents.add(GatewayIntent.MESSAGE_CONTENT);
 
-    // Build bot object
-    JDA bot = JDABuilder.createDefault("MTE3MjMyODU3NTI5OTQ4NTc4Ng.Gp3QUe.o5pr8BZIg0oMs1cu_xbaCy1Qt3xQ4Bz7oBA8J4")
-            .setActivity(Activity.watching("Test"))
-            .addEventListeners(new EchoCommand(ss))
-            .addEventListeners(new WordleCommand(ss))
-            .addEventListeners(new StoreGameChannelCommand(ss))
-            .enableIntents(intents)
-            .addEventListeners(new MessageReceived(ss))
-            .build();
+    try {
+      // Build bot object
+      JDA bot = JDABuilder.createDefault(new String(Files.readAllBytes(Paths.get("src/main/resources/discordToken.txt"))))
+              .setActivity(Activity.playing("Wordle"))
+              .addEventListeners(new StoreGameChannelCommand(ss))
+              .addEventListeners(new MessageReceived(ss))
+              .addEventListeners(new CompareCommand(ss))
+              .enableIntents(intents)
+              .build();
 
-    // Add command options with name, description, and fields.
-    bot.updateCommands().addCommands(
-            Commands.slash("echo", "Repeats message back to you")
-                    .addOption(OptionType.STRING, "message", "The message being repeated", true),
-            Commands.slash("wordle", "Tracks your Wordle score.")
-                    .addOption(OptionType.STRING, "score", "Your Wordle score.", true),
-            Commands.slash("set-channel", "Sets the text channel where game statistics are stored")
-                    .addOption(OptionType.CHANNEL, "channel", "The dedicated game channel.", true)
-    ).queue();
+      // Add command options with name, description, and fields.
+      bot.updateCommands().addCommands(
+              Commands.slash("set-channel", "Sets the text channel where game statistics are stored")
+                      .addOption(OptionType.CHANNEL, "channel", "The dedicated game channel.", true),
+              Commands.slash("compare", "Shows how other players scored. Defaults to showing all scores for all players for all games for today.")
+                      .addOption(OptionType.STRING, "game", "Specify the game being compared", false)
+                      .addOption(OptionType.STRING, "date", "Specify the date in the form of \"MM/DD/YYYY\"", false)
+      ).queue();
 
-
-    // Track the servers this bot is in
-    for(Guild s : bot.awaitReady().getGuilds()) {
-      ss.addServer(s);
+      // Track the servers this bot is in
+      for (Guild s : bot.awaitReady().getGuilds()) {
+        ss.addServer(s);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
-
-
-    FirebaseInitializer fbi = new FirebaseInitializer();
-    fbi.initialize();
   }
 }

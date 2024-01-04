@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
 import model.ServerSettings;
+import model.game.GameType;
 import model.game.data.FirebaseService;
 import model.game.visitor.games.Connections;
 import model.game.visitor.games.IGame;
@@ -39,22 +40,22 @@ public class MessageReceived extends ListenerAdapter {
 
     if (sentFrom.equals(whereToMessage)) {
       String msg = event.getMessage().getContentDisplay();
-      String gameNameString;
+      GameType gameType;
       IGame game;
       if (msg.contains("Connections")) {
-        gameNameString = "Connections";
+        gameType = GameType.CONNECTIONS;
         game = new Connections(msg);
       } else if (msg.contains("Wordle")) {
-        gameNameString = "Wordle";
+        gameType = GameType.WORDLE;
         game = new Wordle(msg);
       } else if (msg.contains("Murdle")) {
-        gameNameString = "Murdle";
+        gameType = GameType.MURDLE;
         game = new Murdle(msg);
       } else if (msg.contains("Mini")) {
-        gameNameString = "Mini Not Link";
+        gameType = GameType.MINI;
         game = new Mini(msg, false);
       } else if (msg.contains("mini")) {
-        gameNameString = "mini link";
+        gameType = GameType.MINI;
         game = new Mini(msg, true);
       } else {
         return;
@@ -70,12 +71,12 @@ public class MessageReceived extends ListenerAdapter {
 
       FirebaseService fbs = new FirebaseService();
       try {
-        fbs.saveScore(score, player, gameNameString, date);
+        fbs.saveScore(score, player, gameType, date);
       } catch (ExecutionException | InterruptedException e) {
         throw new RuntimeException(e);
       }
 
-      whereToMessage.sendMessage("Game: " + gameNameString + "\nDate: "
+      whereToMessage.sendMessage("Game: " + gameType + "\nDate: "
               + date + "\nScore:\n" + score).queue();
     }
   }
