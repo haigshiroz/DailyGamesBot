@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import commands.CompareCommand;
-import commands.MessageReceived;
+import commands.ScanMessages;
 import commands.StoreGameChannelCommand;
 import model.ServerSettings;
 import model.game.data.FirebaseInitializer;
@@ -28,8 +28,7 @@ public class DiscordBot {
    * @param args String arguments.
    */
   public static void main(String[] args) throws InterruptedException {
-    FirebaseInitializer fbi = new FirebaseInitializer();
-    fbi.initialize();
+    FirebaseInitializer.initialize();
 
     // Server Settings
     ServerSettings ss = new ServerSettings();
@@ -41,8 +40,8 @@ public class DiscordBot {
       JDA bot = JDABuilder.createDefault(new String(Files.readAllBytes(Paths.get("src/main/resources/discordToken.txt"))))
               .setActivity(Activity.playing("Wordle"))
               .addEventListeners(new StoreGameChannelCommand(ss))
-              .addEventListeners(new MessageReceived(ss))
-              .addEventListeners(new CompareCommand(ss))
+              .addEventListeners(new ScanMessages(ss))
+              .addEventListeners(new CompareCommand())
               .enableIntents(intents)
               .build();
 
@@ -50,7 +49,7 @@ public class DiscordBot {
       bot.updateCommands().addCommands(
               Commands.slash("set-channel", "Sets the text channel where game statistics are stored")
                       .addOption(OptionType.CHANNEL, "channel", "The dedicated game channel.", true),
-              Commands.slash("compare", "Shows how other players scored. Defaults to showing all scores for all players for all games for today.")
+              Commands.slash("compare", "Shows how other players scored. Defaults to all scores for all games for today.")
                       .addOption(OptionType.STRING, "game", "Specify the game being compared", false)
                       .addOption(OptionType.STRING, "date", "Specify the date in the form of \"MM/DD/YYYY\"", false)
       ).queue();

@@ -13,6 +13,7 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 
 import java.util.Date;
@@ -24,25 +25,28 @@ import java.util.concurrent.ExecutionException;
 import model.game.GameType;
 
 public class FirebaseService {
-  public String saveScore(String score, User player, GameType game, Date dayOfGame) throws ExecutionException, InterruptedException {
+  public static void saveScore(ScoreData data) throws ExecutionException, InterruptedException {
     Map<String, String> dataSubmission = new HashMap<>();
-    dataSubmission.put("Date", dayOfGame.toString());
-    dataSubmission.put("Game", game.toString());
-    dataSubmission.put("Player", player.getName());
-    dataSubmission.put("Score", score);
+    dataSubmission.put("Date", data.getDate().toString());
+    dataSubmission.put("Game", data.getGame().toString());
+    dataSubmission.put("Player", data.getPlayer().getName());
+    dataSubmission.put("Score", data.getScore());
+    dataSubmission.put("Server", data.getServer().getId());
 
     Firestore dataBase = FirestoreClient.getFirestore();
-    ApiFuture<WriteResult> apiWriteCallResult = dataBase.collection("gameScores").document().set(dataSubmission);
-
-    return apiWriteCallResult.get().getUpdateTime().toString();
+    //ApiFuture<WriteResult> apiWriteCallResult =
+    dataBase.collection("gameScores").document().set(dataSubmission);
+    //return apiWriteCallResult.get().getUpdateTime().toString();
   }
 
-  public String getScoreForGameForDay(GameType game, Date date) {
+  public static String getScoreForGameForDay(GameType game, Date date, Guild server) {
     Filter filterGame = Filter.equalTo("Game", game.toString());
     Filter filterDate = Filter.equalTo("Date", date.toString());
+    Filter filterServer = Filter.equalTo("Server", server.getId());
 
     Firestore dataBase = FirestoreClient.getFirestore();
-    ApiFuture<QuerySnapshot> documentReference = dataBase.collection("gameScores").where(filterGame).where(filterDate).get();
+    ApiFuture<QuerySnapshot> documentReference = dataBase.collection("gameScores").
+            where(filterServer).where(filterGame).where(filterDate).get();
     List<QueryDocumentSnapshot> queryDocumentSnapshots = null;
     try {
       queryDocumentSnapshots = documentReference.get().getDocuments();
@@ -52,9 +56,9 @@ public class FirebaseService {
 
     String data = "Error finding data.";
 
-    if(queryDocumentSnapshots != null) {
+    if (queryDocumentSnapshots != null) {
       data = "";
-      for(QueryDocumentSnapshot qds : queryDocumentSnapshots) {
+      for (QueryDocumentSnapshot qds : queryDocumentSnapshots) {
         //String id = qds.getId();
         data += "Player: " + qds.getString("Player") + "\n";
         data += "Game: " + qds.getString("Game") + "\n";

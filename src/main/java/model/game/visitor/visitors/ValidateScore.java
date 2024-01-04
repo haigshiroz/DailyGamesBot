@@ -38,7 +38,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
       return false;
     }
 
-    if (!this.IsStringInteger(firstSplit[1])) {
+    if (!isStringInteger(firstSplit[1])) {
       // Second word should be a number representing the date.
       return false;
     } else {
@@ -53,7 +53,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
     // First is the number of tries 1-6 or X, second is "/" and third is "6".
     // Optional fourth is "*".
     String firstLineThirdWordFirstLetter = firstSplit[2].substring(0, 1);
-    if (this.IsStringInteger(firstLineThirdWordFirstLetter)) {
+    if (isStringInteger(firstLineThirdWordFirstLetter)) {
       int num = Integer.parseInt(firstLineThirdWordFirstLetter);
       if (num < 1 || num > 6) {
         return false;
@@ -65,12 +65,8 @@ public class ValidateScore implements IGameVisitor<Boolean> {
     }
 
     String firstLineThirdWordRest = firstSplit[2].substring(1);
-    if (!firstLineThirdWordRest.equals("/6") && !firstLineThirdWordRest.equals("/6*")) {
-      // Rest of the string must be "/6" or "/6*".
-      return false;
-    }
-
-    return true;
+    // Rest of the string must be "/6" or "/6*".
+    return firstLineThirdWordRest.equals("/6") || firstLineThirdWordRest.equals("/6*");
   }
 
   private boolean wordleSecondLineValid(String secondLine) {
@@ -166,7 +162,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
     boolean staticValid = staticHalf.equals("Puzzle #");
     boolean dynamicValid;
 
-    if (!this.IsStringInteger(dynamicHalf)) {
+    if (!isStringInteger(dynamicHalf)) {
       return false;
     } else {
       int num = Integer.parseInt(dynamicHalf);
@@ -239,7 +235,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
       // Should be three terms (year-month-date)
       return false;
     }
-    if (!this.IsStringInteger(dateSplit[0] + dateSplit[1] + dateSplit[2])) {
+    if (!isStringInteger(dateSplit[0] + dateSplit[1] + dateSplit[2])) {
       // The three terms should all be integers (year, month, date)
       return false;
     }
@@ -251,7 +247,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
     boolean afterdateBeforeTimeValid = afterDateBeforeTime.equals("&t=");
     // Time can be an arbitrary number of digits, just check that there is at least one digit > 0.
     String time = dynamicHalf.substring(13, 14);
-    if (!this.IsStringInteger(time)) {
+    if (!isStringInteger(time)) {
       return false;
     }
     boolean timeValid = Integer.parseInt(time) > 0;
@@ -291,7 +287,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
       // Must have three terms (month, day, year).
       return false;
     }
-    if (!this.IsStringInteger(splitDate[0] + splitDate[1] + splitDate[2])) {
+    if (!isStringInteger(splitDate[0] + splitDate[1] + splitDate[2])) {
       // The three terms must be integers.
       return false;
     }
@@ -312,7 +308,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
       // Second segment must be of length 3 (two digit seconds + !).
       return false;
     }
-    if (!this.IsStringInteger(timeSplit[0]) || !this.IsStringInteger(timeSplit[1].substring(0, 2))) {
+    if (!isStringInteger(timeSplit[0]) || !isStringInteger(timeSplit[1].substring(0, 2))) {
       // Both terms must be integers (minus the ! of the second term).
       return false;
     }
@@ -467,7 +463,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
 
       // Third word should be a valid MM/DD/YYYY.
       String[] dateSplit = lineTwoSplit[2].split("/");
-      if (valid && !this.IsStringInteger(dateSplit[0] + dateSplit[1] + dateSplit[2])) {
+      if (valid && !isStringInteger(dateSplit[0] + dateSplit[1] + dateSplit[2])) {
         // Date should be integers.
         valid = false;
       }
@@ -547,7 +543,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
           // Go by 3's since each number emoji is strings of length of three.
           for (int strInd = 0; strInd < thirdCombined.length(); strInd += 3) {
             String tempStr = thirdCombined.substring(strInd, strInd + 3);
-            if (!(this.IsStringInteger(tempStr.substring(0, 1)) && tempStr.substring(1).compareTo("\uFE0F\u20E3") == 0)) {
+            if (!(isStringInteger(tempStr.substring(0, 1)) && tempStr.substring(1).compareTo("\uFE0F\u20E3") == 0)) {
               // Each group of three single Strings must be a number emoji.
               thirdValid = false;
               break;
@@ -565,7 +561,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
     return valid;
   }
 
-  private boolean IsStringInteger(String str) {
+  public static boolean isStringInteger(String str) {
     // Check if it's null and if the length is greater than 0
     if (str == null) {
       return false;
@@ -583,7 +579,7 @@ public class ValidateScore implements IGameVisitor<Boolean> {
       }
     }
 
-    // Otherwise, all chars are between 0-9 so it's an integer.
+    // Otherwise, all chars are between 0-9, so it's an integer.
     return true;
   }
 }

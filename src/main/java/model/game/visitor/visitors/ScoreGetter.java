@@ -48,18 +48,18 @@ public class ScoreGetter implements IGameVisitor<String> {
       // Loop for every single string at the time. Once a non-integer is reached, break.
       for (int strInd = 0; true; strInd++) {
         String str = timeAndAfter.substring(strInd, strInd + 1);
-        if (this.IsStringInteger(str)) {
+        if (ValidateScore.isStringInteger(str)) {
           time += str;
         } else {
           break;
         }
       }
 
-      return time;
+      return time + "seconds";
     } else {
       String[] splitScore = score.split(" ");
       String time = splitScore[10];
-      return time.substring(0, time.length() - 1);
+      return time.substring(0, time.length() - 1) + "seconds";
     }
   }
 
@@ -80,27 +80,5 @@ public class ScoreGetter implements IGameVisitor<String> {
       ret += scoreSplit[3] + "\n" + scoreSplit[4] + "\n" + scoreSplit[6] + "\n" + scoreSplit[8] + "\n" + scoreSplit[9];
     }
     return ret;
-  }
-
-  private boolean IsStringInteger(String str) {
-    // Check if it's null and if the length is greater than 0
-    if (str == null) {
-      return false;
-    }
-    int length = str.length();
-    if (length == 0) {
-      return false;
-    }
-
-    for (int ind = 0; ind < length; ind++) {
-      char c = str.charAt(ind);
-      if (c < '0' || c > '9') {
-        // If the char is not 0-9, return false
-        return false;
-      }
-    }
-
-    // Otherwise, all chars are between 0-9 so it's an integer.
-    return true;
   }
 }

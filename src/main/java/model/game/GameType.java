@@ -1,5 +1,8 @@
 package model.game;
 
+/**
+ * Represents the available Games support by DailyGamesBot.
+ */
 public enum GameType {
   WORDLE("Wordle"),
   CONNECTIONS("Connections"),
@@ -17,9 +20,17 @@ public enum GameType {
     return this.gameName;
   }
 
-  public static GameType stringToGameType(String name) {
-    for(GameType gt : GameType.values()) {
-      if(gt.toString().equalsIgnoreCase(name)) {
+  /**
+   * Converts the given string to the corresponding GameType object.
+   * String must be one of the available GameTypes (case insensitive).
+   *
+   * @param gameString String to be converted to a GameType.
+   * @return The corresponding GameType based off the given String.
+   * @throws IllegalArgumentException If the provided String is not a valid game type.
+   */
+  public static GameType stringToGameType(String gameString) {
+    for (GameType gt : GameType.values()) {
+      if (gt.toString().equalsIgnoreCase(gameString)) {
         return gt;
       }
     }
@@ -27,13 +38,22 @@ public enum GameType {
     throw new IllegalArgumentException("Given string is not a valid game type");
   }
 
-  public static boolean stringIsGameType(String name) {
-    for(GameType gt : GameType.values()) {
-      if(gt.toString().equalsIgnoreCase(name)) {
-        return true;
+  /**
+   * Checks whether the given String is a valid game name to be converted to a GameType.
+   * A valid game name is once of the available GameTypes.
+   *
+   * @param gameString String to check whether it is a valid game name to be converted to a GameType.
+   * @return Whether the given string is a valid name to be converted to a GameType object.
+   */
+  public static boolean stringIsGameType(String gameString) {
+    boolean ret = false;
+    for (GameType gt : GameType.values()) {
+      if (gt.toString().equalsIgnoreCase(gameString)) {
+        ret = true;
+        break;
       }
     }
 
-    return false;
+    return ret;
   }
 }

@@ -1,7 +1,9 @@
 package commands;
 
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -11,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import model.ServerSettings;
 import model.game.GameType;
 import model.game.data.FirebaseService;
+import model.game.data.ScoreData;
 import model.game.visitor.games.Connections;
 import model.game.visitor.games.IGame;
 import model.game.visitor.games.Mini;
@@ -20,16 +23,17 @@ import model.game.visitor.visitors.DateGetter;
 import model.game.visitor.visitors.ScoreGetter;
 import model.game.visitor.visitors.ValidateScore;
 
-public class MessageReceived extends ListenerAdapter {
+public class ScanMessages extends ListenerAdapter {
   private final ServerSettings ss;
 
-  public MessageReceived(ServerSettings ss) {
+  public ScanMessages(ServerSettings ss) {
     this.ss = ss;
   }
 
   @Override
   public void onMessageReceived(MessageReceivedEvent event) {
     // If a bot sent the message then LEAVE!!
+    // Used to narrow down messages scanned for performance.
     if (event.getAuthor().isBot()) {
       return;
     }
@@ -58,26 +62,28 @@ public class MessageReceived extends ListenerAdapter {
         gameType = GameType.MINI;
         game = new Mini(msg, true);
       } else {
+        // If the message does not consist a game name, ignore it and return.
         return;
       }
 
-      // If it's not a valid score, skip
+      // If it's not a valid score, ignore the message and return.
       if (!game.accept(new ValidateScore())) {
         return;
       }
+
+      User player = event.getAuthor();
       Date date = game.accept(new DateGetter());
       String score = game.accept(new ScoreGetter());
-      User player = event.getAuthor();
+      Guild server = event.getGuild();
+      ScoreData data = new ScoreData(player, gameType, date, score, server);
 
-      FirebaseService fbs = new FirebaseService();
       try {
-        fbs.saveScore(score, player, gameType, date);
+        FirebaseService.saveScore(data);
       } catch (ExecutionException | InterruptedException e) {
-        throw new RuntimeException(e);
+        whereToMessage.sendMessage("Failed to save data").queue();
       }
-
-      whereToMessage.sendMessage("Game: " + gameType + "\nDate: "
-              + date + "\nScore:\n" + score).queue();
+      event.getMessage().addReaction(Emoji.fromUnicode("\u2705")).queue();
+      //whereToMessage.sendMessage("Game: " + gameType + "\nDate: " + date + "\nScore:\n" + score).queue();
     }
   }
 }
