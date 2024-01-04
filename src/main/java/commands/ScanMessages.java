@@ -32,11 +32,9 @@ public class ScanMessages extends ListenerAdapter {
     }
 
     MessageChannel sentFrom = event.getChannel().asTextChannel();
-    MessageChannel whereToMessage = FirebaseService.getDedicatedChannel(event.getGuild(), sentFrom);;
+    MessageChannel whereToMessage = FirebaseService.getDedicatedChannel(event.getGuild(), sentFrom);
 
     if (sentFrom.equals(whereToMessage)) {
-      System.out.println(whereToMessage.getName());
-
       String msg = event.getMessage().getContentDisplay();
       GameType gameType;
       IGame game;
@@ -72,14 +70,16 @@ public class ScanMessages extends ListenerAdapter {
       ScoreData data = new ScoreData(player, gameType, date, score, server);
 
       try {
-        FirebaseService.saveScore(data);
-        // Confirm message was received, validated, and added to the database by
-        // adding a check mark reaction to it.
-        event.getMessage().addReaction(Emoji.fromUnicode("\u2705")).queue();
+        if (!FirebaseService.isDataDuplicate(data)) {
+          // Only add data if it is not duplicate.
+          FirebaseService.saveScore(data);
+          // Confirm message was received, validated, and added to the database by
+          // adding a check mark reaction to it.
+          event.getMessage().addReaction(Emoji.fromUnicode("\u2705")).queue();
+        }
       } catch (ExecutionException | InterruptedException e) {
         whereToMessage.sendMessage("Failed to save data").queue();
       }
-      //whereToMessage.sendMessage("Game: " + gameType + "\nDate: " + date + "\nScore:\n" + score).queue();
     }
   }
 }

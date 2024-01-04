@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import commands.CompareCommand;
+import commands.DeleteScoreCommand;
 import commands.ScanMessages;
 import commands.StoreGameChannelCommand;
 import model.game.data.FirebaseInitializer;
@@ -39,6 +40,7 @@ public class DiscordBot {
               .addEventListeners(new StoreGameChannelCommand())
               .addEventListeners(new ScanMessages())
               .addEventListeners(new CompareCommand())
+              .addEventListeners(new DeleteScoreCommand())
               .enableIntents(intents)
               .build();
 
@@ -48,7 +50,10 @@ public class DiscordBot {
                       .addOption(OptionType.CHANNEL, "channel", "The dedicated game channel.", true),
               Commands.slash("compare", "Shows how other players scored. Defaults to all scores for all games for today.")
                       .addOption(OptionType.STRING, "game", "Specify the game being compared", false)
-                      .addOption(OptionType.STRING, "date", "Specify the date in the form of \"MM/DD/YYYY\"", false)
+                      .addOption(OptionType.STRING, "date", "Specify the date in the form of \"MM/DD/YYYY\"", false),
+              Commands.slash("delete-score", "Deletes a stored score from a given game and date.")
+                      .addOption(OptionType.STRING, "date", "The date the score was for in \"MM/DD/YYYY\".", true)
+                      .addOption(OptionType.STRING, "game", "The game the score was for.", true)
       ).queue();
     } catch (IOException e) {
       e.printStackTrace();

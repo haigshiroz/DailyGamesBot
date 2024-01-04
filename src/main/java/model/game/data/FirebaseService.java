@@ -27,6 +27,8 @@ import model.game.GameType;
 
 public class FirebaseService {
   public static void saveScore(ScoreData data) throws ExecutionException, InterruptedException {
+    // Add all the data to a Map (Firebase accepts Maps as data).
+    // Keys are fields and values are the data representing that field.
     Map<String, String> dataSubmission = new HashMap<>();
     dataSubmission.put("Date", data.getDate().toString());
     dataSubmission.put("Game", data.getGame().toString());
@@ -34,17 +36,51 @@ public class FirebaseService {
     dataSubmission.put("Score", data.getScore());
     dataSubmission.put("Server", data.getServer().getId());
 
+    // Upload data to database.
     Firestore dataBase = FirestoreClient.getFirestore();
-    //ApiFuture<WriteResult> apiWriteCallResult =
     dataBase.collection("gameScores").document().set(dataSubmission);
-    //return apiWriteCallResult.get().getUpdateTime().toString();
+  }
+
+  public static boolean isDataDuplicate(ScoreData data) {
+    // Boolean returning whether the data is a duplicate.
+    boolean ret = true;
+
+    // Filters to check if the game data was already in the database.
+    // Duplicates have the same date, game, player, score, and server.
+    Filter filterDate = Filter.equalTo("Date", data.getDate().toString());
+    Filter filterGame = Filter.equalTo("Game", data.getGame().toString());
+    Filter filterPlayer = Filter.equalTo("Player", data.getPlayer().getName());
+    Filter filterScore = Filter.equalTo("Score", data.getScore());
+    Filter filterServer = Filter.equalTo("Server", data.getServer().getId());
+
+    // Obtain data that fits all the above filters.
+    Firestore dataBase = FirestoreClient.getFirestore();
+    ApiFuture<QuerySnapshot> documentReference = dataBase.collection("gameScores").
+            where(filterServer).
+            where(filterGame).
+            where(filterDate).
+            where(filterScore).
+            where(filterPlayer).get();
+
+    // Check if the data is present. If so, it is a duplicate.
+    List<QueryDocumentSnapshot> queryDocumentSnapshots = null;
+    try {
+      queryDocumentSnapshots = documentReference.get().getDocuments();
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
+    // If the filters produce an empty list (as in the data is not a duplicate), it is not a duplicate.
+    if (queryDocumentSnapshots != null && queryDocumentSnapshots.isEmpty()) {
+      ret = false;
+    }
+
+    return ret;
   }
 
   public static String getScoreForGameForDay(GameType game, Date date, Guild server) {
     Filter filterGame = Filter.equalTo("Game", game.toString());
     Filter filterDate = Filter.equalTo("Date", date.toString());
     Filter filterServer = Filter.equalTo("Server", server.getId());
-
     Firestore dataBase = FirestoreClient.getFirestore();
     ApiFuture<QuerySnapshot> documentReference = dataBase.collection("gameScores").
             where(filterServer).where(filterGame).where(filterDate).get();
@@ -90,10 +126,46 @@ public class FirebaseService {
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
     }
-    if(channelID != null) {
+    if (channelID != null) {
       ret = server.getChannelById(MessageChannel.class, channelID.toString());
     }
 
     return ret;
+  }
+
+  public static boolean deleteScore(ScoreData data) {
+    boolean dataFound = false;
+
+    // Filters to find that data (score does not matter).
+    Filter filterDate = Filter.equalTo("Date", data.getDate().toString());
+    Filter filterGame = Filter.equalTo("Game", data.getGame().toString());
+    Filter filterPlayer = Filter.equalTo("Player", data.getPlayer().getName());
+    Filter filterServer = Filter.equalTo("Server", data.getServer().getId());
+
+    // Obtain data that fits all the above filters.
+    Firestore dataBase = FirestoreClient.getFirestore();
+    ApiFuture<QuerySnapshot> documentReference = dataBase.collection("gameScores").
+            where(filterServer).
+            where(filterGame).
+            where(filterDate).
+            where(filterPlayer).get();
+
+    // Check if the data is present. If so, it is a duplicate.
+    List<QueryDocumentSnapshot> queryDocumentSnapshots = null;
+    try {
+      queryDocumentSnapshots = documentReference.get().getDocuments();
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
+
+    // If the data is there, delete it. In theory, this should just be a list of size 1.
+    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+      dataFound = true;
+      for(QueryDocumentSnapshot qds : queryDocumentSnapshots) {
+        dataBase.collection("gameScores").document(qds.getId()).delete();
+      }
+    }
+
+    return dataFound;
   }
 }
