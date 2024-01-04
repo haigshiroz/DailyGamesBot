@@ -15,6 +15,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -68,5 +69,31 @@ public class FirebaseService {
     }
 
     return data;
+  }
+
+  public static void saveServerSettings(Guild server, MessageChannel channel) throws ExecutionException, InterruptedException {
+    Map<String, String> dataSubmission = new HashMap<>();
+    dataSubmission.put("Dedicated Channel ID", channel.getId());
+
+    Firestore dataBase = FirestoreClient.getFirestore();
+    dataBase.collection("serverSettings").document(server.getId()).set(dataSubmission);
+  }
+
+  public static MessageChannel getDedicatedChannel(Guild server, MessageChannel channel) {
+    String serverID = server.getId();
+    MessageChannel ret = channel;
+
+    Firestore dataBase = FirestoreClient.getFirestore();
+    Object channelID = null;
+    try {
+      channelID = dataBase.collection("serverSettings").document(serverID).get().get().get("Dedicated Channel ID");
+    } catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+    }
+    if(channelID != null) {
+      ret = server.getChannelById(MessageChannel.class, channelID.toString());
+    }
+
+    return ret;
   }
 }

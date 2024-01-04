@@ -15,7 +15,6 @@ import java.util.Collection;
 import commands.CompareCommand;
 import commands.ScanMessages;
 import commands.StoreGameChannelCommand;
-import model.ServerSettings;
 import model.game.data.FirebaseInitializer;
 
 /**
@@ -30,8 +29,6 @@ public class DiscordBot {
   public static void main(String[] args) throws InterruptedException {
     FirebaseInitializer.initialize();
 
-    // Server Settings
-    ServerSettings ss = new ServerSettings();
     Collection<GatewayIntent> intents = new ArrayList<>();
     intents.add(GatewayIntent.MESSAGE_CONTENT);
 
@@ -39,8 +36,8 @@ public class DiscordBot {
       // Build bot object
       JDA bot = JDABuilder.createDefault(new String(Files.readAllBytes(Paths.get("src/main/resources/discordToken.txt"))))
               .setActivity(Activity.playing("Wordle"))
-              .addEventListeners(new StoreGameChannelCommand(ss))
-              .addEventListeners(new ScanMessages(ss))
+              .addEventListeners(new StoreGameChannelCommand())
+              .addEventListeners(new ScanMessages())
               .addEventListeners(new CompareCommand())
               .enableIntents(intents)
               .build();
@@ -53,11 +50,6 @@ public class DiscordBot {
                       .addOption(OptionType.STRING, "game", "Specify the game being compared", false)
                       .addOption(OptionType.STRING, "date", "Specify the date in the form of \"MM/DD/YYYY\"", false)
       ).queue();
-
-      // Track the servers this bot is in
-      for (Guild s : bot.awaitReady().getGuilds()) {
-        ss.addServer(s);
-      }
     } catch (IOException e) {
       e.printStackTrace();
     }

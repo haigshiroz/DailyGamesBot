@@ -14,16 +14,13 @@ import model.game.data.FirebaseService;
 import model.game.visitor.visitors.ValidateScore;
 
 public class CompareCommand extends ListenerAdapter {
-  public CompareCommand() {
-  }
-
   @Override
   public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-    // Defer reply due to long wait time of accessing database.
-    event.deferReply().setEphemeral(true).queue();
-
     // If the event's command name is "compare"
     if (event.getName().equals("compare")) {
+      // Defer reply due to long wait time of accessing database.
+      event.deferReply().setEphemeral(true).queue();
+
       // Game and Date are optional fields and thus may not be provided.
       // Check if they are present and execute a query accordingly.
       OptionMapping gameOption = event.getOption("game");
@@ -72,7 +69,7 @@ public class CompareCommand extends ListenerAdapter {
           reply += FirebaseService.getScoreForGameForDay(gt, date, server);
         }
       } else {
-        // Default, query today's date and every
+        // Default, query today's date and every game.
         date = this.todaysDate();
 
         for (GameType gt : GameType.values()) {

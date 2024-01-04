@@ -10,7 +10,6 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import java.util.Date;
 import java.util.concurrent.ExecutionException;
 
-import model.ServerSettings;
 import model.game.GameType;
 import model.game.data.FirebaseService;
 import model.game.data.ScoreData;
@@ -24,12 +23,6 @@ import model.game.visitor.visitors.ScoreGetter;
 import model.game.visitor.visitors.ValidateScore;
 
 public class ScanMessages extends ListenerAdapter {
-  private final ServerSettings ss;
-
-  public ScanMessages(ServerSettings ss) {
-    this.ss = ss;
-  }
-
   @Override
   public void onMessageReceived(MessageReceivedEvent event) {
     // If a bot sent the message then LEAVE!!
@@ -39,10 +32,11 @@ public class ScanMessages extends ListenerAdapter {
     }
 
     MessageChannel sentFrom = event.getChannel().asTextChannel();
-    MessageChannel whereToMessage =
-            this.ss.getDedicatedChannel(event.getGuild(), sentFrom);
+    MessageChannel whereToMessage = FirebaseService.getDedicatedChannel(event.getGuild(), sentFrom);;
 
     if (sentFrom.equals(whereToMessage)) {
+      System.out.println(whereToMessage.getName());
+
       String msg = event.getMessage().getContentDisplay();
       GameType gameType;
       IGame game;
@@ -79,10 +73,12 @@ public class ScanMessages extends ListenerAdapter {
 
       try {
         FirebaseService.saveScore(data);
+        // Confirm message was received, validated, and added to the database by
+        // adding a check mark reaction to it.
+        event.getMessage().addReaction(Emoji.fromUnicode("\u2705")).queue();
       } catch (ExecutionException | InterruptedException e) {
         whereToMessage.sendMessage("Failed to save data").queue();
       }
-      event.getMessage().addReaction(Emoji.fromUnicode("\u2705")).queue();
       //whereToMessage.sendMessage("Game: " + gameType + "\nDate: " + date + "\nScore:\n" + score).queue();
     }
   }
