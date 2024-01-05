@@ -46,11 +46,10 @@ public class FirebaseService {
     boolean ret = true;
 
     // Filters to check if the game data was already in the database.
-    // Duplicates have the same date, game, player, score, and server.
+    // Duplicates have the same date, game, player, and server. Not the same score.
     Filter filterDate = Filter.equalTo("Date", data.getDate().toString());
     Filter filterGame = Filter.equalTo("Game", data.getGame().toString());
     Filter filterPlayer = Filter.equalTo("Player", data.getPlayer().getName());
-    Filter filterScore = Filter.equalTo("Score", data.getScore());
     Filter filterServer = Filter.equalTo("Server", data.getServer().getId());
 
     // Obtain data that fits all the above filters.
@@ -59,7 +58,6 @@ public class FirebaseService {
             where(filterServer).
             where(filterGame).
             where(filterDate).
-            where(filterScore).
             where(filterPlayer).get();
 
     // Check if the data is present. If so, it is a duplicate.
@@ -69,7 +67,7 @@ public class FirebaseService {
     } catch (InterruptedException | ExecutionException e) {
       e.printStackTrace();
     }
-    // If the filters produce an empty list (as in the data is not a duplicate), it is not a duplicate.
+    // If the filters produce an empty list, the data is not a duplicate.
     if (queryDocumentSnapshots != null && queryDocumentSnapshots.isEmpty()) {
       ret = false;
     }

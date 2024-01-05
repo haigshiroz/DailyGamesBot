@@ -23,13 +23,11 @@ public class DeleteScoreCommand extends ListenerAdapter {
 
       OptionMapping gameOption = event.getOption("game");
       OptionMapping dateOption = event.getOption("date");
-      String gameString = null;
-      String dateString = null;
 
       // If the required options are not null, validate them and convert them to Strings.
       if(gameOption != null && dateOption != null) {
-        gameString = gameOption.getAsString();
-        dateString = dateOption.getAsString();
+        String gameString = gameOption.getAsString();
+        String dateString = dateOption.getAsString();
 
         if(GameType.stringIsGameType(gameString) && this.isValidDate(dateString)) {
           GameType game = GameType.stringToGameType(gameString);

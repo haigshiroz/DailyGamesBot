@@ -439,8 +439,6 @@ public class ValidateScore implements IGameVisitor<Boolean> {
         valid = false;
       }
     }
-    System.out.println(valid);
-
 
     return valid;
   }
