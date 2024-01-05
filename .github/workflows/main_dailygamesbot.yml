@@ -50,4 +50,4 @@ jobs:
           app-name: 'DailyGamesBot'
           slot-name: 'Production'
           package: '*.jar'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_905E14EEB466465F8C115A598B97BD98 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9626F2D4E848468182DA5D643CF65C9C }}
