@@ -3,70 +3,83 @@ package model.game.visitor.visitors;
 public class ValidateScore implements IGameVisitor<Boolean> {
   @Override
   public Boolean visitWordle(String score) {
-    if (score == null) {
-      // Given String must not be null.
-      return false;
+    // Given String must not be null.
+    boolean valid = score != null;
+
+    String[] splitString = null;
+    if (valid) {
+      // Split the score string by each individual line.
+      splitString = score.split("\n");
+
+      // Count how many lines there are. Minimum score is 1 guess, max is 6 guesses.
+      // The header and line gap are two lines, therefore the total must be
+      // between 3 and 8 lines.
+      int length = splitString.length;
+      if (length < 3 || length > 8) {
+        valid = false;
+      }
     }
 
-    // Split the score string by each individual line
-    String[] splitString = score.split("\n");
+    if (valid) {
+      boolean firstLineValid = this.wordleFirstLineValid(splitString[0]);
+      boolean secondLineValid = this.wordleSecondLineValid(splitString[1]);
+      boolean thirdPlusLineValid = this.wordleThirdPlusLinesValid(splitString);
 
-    // Count how many lines there are. Minimum score is 1 guess, max is 6 guesses.
-    // The header and line gap are two lines, therefore the total must be
-    // between 3 and 8 lines.
-    int length = splitString.length;
-    if (length < 3 || length > 8) {
-      return false;
+      valid = (firstLineValid && secondLineValid && thirdPlusLineValid);
     }
 
-    boolean firstLineValid = this.wordleFirstLineValid(splitString[0]);
-    boolean secondLineValid = this.wordleSecondLineValid(splitString[1]);
-    boolean thirdPlusLineValid = this.wordleThirdPlusLinesValid(splitString);
-
-    return (firstLineValid && secondLineValid && thirdPlusLineValid);
+    return valid;
   }
 
   private boolean wordleFirstLineValid(String firstLine) {
+    boolean valid = true;
+
     // Split first line into the name, the date, and score.
     String[] firstSplit = firstLine.split(" ");
     if (firstSplit.length != 3) {
-      return false;
+      valid = false;
     }
 
-    if (!firstSplit[0].equals("Wordle")) {
+    if (valid && !firstSplit[0].equals("Wordle")) {
       // First word should be "Wordle"
-      return false;
+      valid = false;
     }
 
-    if (!isStringInteger(firstSplit[1])) {
+    if (valid && !isStringInteger(firstSplit[1])) {
       // Second word should be a number representing the date.
-      return false;
+      valid = false;
     } else {
       int gameNum = Integer.parseInt(firstSplit[1]);
       if (gameNum < 0) {
         // First Wordle started at 0.
-        return false;
+        valid = false;
       }
     }
 
-    // Split the third word into individual characters.
-    // First is the number of tries 1-6 or X, second is "/" and third is "6".
-    // Optional fourth is "*".
-    String firstLineThirdWordFirstLetter = firstSplit[2].substring(0, 1);
-    if (isStringInteger(firstLineThirdWordFirstLetter)) {
-      int num = Integer.parseInt(firstLineThirdWordFirstLetter);
-      if (num < 1 || num > 6) {
-        return false;
-      }
-    } else {
-      if (!firstLineThirdWordFirstLetter.equals("X")) {
-        return false;
+    if (valid) {
+      // Split the third word into individual characters.
+      // First is the number of tries 1-6 or X, second is "/" and third is "6".
+      // Optional fourth is "*".
+      String firstLineThirdWordFirstLetter = firstSplit[2].substring(0, 1);
+      if (isStringInteger(firstLineThirdWordFirstLetter)) {
+        int num = Integer.parseInt(firstLineThirdWordFirstLetter);
+        if (num < 1 || num > 6) {
+          valid = false;
+        }
+      } else {
+        if (!firstLineThirdWordFirstLetter.equals("X")) {
+          valid = false;
+        }
       }
     }
 
-    String firstLineThirdWordRest = firstSplit[2].substring(1);
-    // Rest of the string must be "/6" or "/6*".
-    return firstLineThirdWordRest.equals("/6") || firstLineThirdWordRest.equals("/6*");
+    if (valid) {
+      String firstLineThirdWordRest = firstSplit[2].substring(1);
+      // Rest of the string must be "/6" or "/6*".
+      valid = firstLineThirdWordRest.equals("/6") || firstLineThirdWordRest.equals("/6*");
+    }
+
+    return valid;
   }
 
   private boolean wordleSecondLineValid(String secondLine) {
@@ -74,6 +87,8 @@ public class ValidateScore implements IGameVisitor<Boolean> {
   }
 
   private boolean wordleThirdPlusLinesValid(String[] splitString) {
+    boolean valid = true;
+
     for (int lineNum = 2; lineNum < splitString.length; lineNum++) {
       // Obtain each line past the second line.
       String line = splitString[lineNum];
@@ -92,17 +107,20 @@ public class ValidateScore implements IGameVisitor<Boolean> {
           stringIndex++;
           if (stringIndex >= line.length()) {
             // Make sure the next string index is in bounds.
-            return false;
+            valid = false;
+            break;
           }
           // Obtain the next letter.
           String nextLetter = line.substring(stringIndex, stringIndex + 1);
           if (nextLetter.compareTo("\uDFE8") != 0 && nextLetter.compareTo("\uDFE9") != 0) {
             // Check if the code matches that of yellow or green squares.
-            return false;
+            valid = false;
+            break;
           }
         } else if (letter.compareTo("\u2B1B") != 0) {
           // Check if the code is that of a black square.
-          return false;
+          valid = false;
+          break;
         }
 
         // Add to the number of characters counted.
@@ -111,37 +129,43 @@ public class ValidateScore implements IGameVisitor<Boolean> {
 
       if (numCharsCounted != 5) {
         // Each wordle guess is five letters.
-        return false;
+        valid = false;
+        break;
       }
     }
 
-    return true;
+    return valid;
   }
 
   @Override
   public Boolean visitConnections(String score) {
-    if (score == null) {
-      // Given String must not be null.
-      return false;
+    // Given String must not be null.
+    boolean valid = score != null;
+
+    String[] splitString = null;
+    if (valid) {
+      // Split the score string by each individual line
+      splitString = score.split("\n");
+
+      // Count how many lines there are.
+      // Minimum score is 4 right guesses, max is 7 (3 right/wrong and 4 wrong/right) guesses.
+      // The header is two lines therefore the total string must be
+      // between 6 and 9 lines.
+      int length = splitString.length;
+      if (length < 6 || length > 9) {
+        valid = false;
+      }
     }
 
-    // Split the score string by each individual line
-    String[] splitString = score.split("\n");
-
-    // Count how many lines there are.
-    // Minimum score is 4 right guesses, max is 7 (3 right/wrong and 4 wrong/right) guesses.
-    // The header is two lines therefore the total string must be
-    // between 6 and 9 lines.
-    int length = splitString.length;
-    if (length < 6 || length > 9) {
-      return false;
+    if (valid) {
+      boolean firstLineValid = this.connectionsFirstLineValid(splitString[0]);
+      boolean secondLineValid = this.connectionsSecondLineValid(splitString[1]);
+      boolean thirdPlusLineValid = this.connectionsThirdPlusLinesValid(splitString);
+      valid = (firstLineValid && secondLineValid && thirdPlusLineValid);
     }
 
-    boolean firstLineValid = this.connectionsFirstLineValid(splitString[0]);
-    boolean secondLineValid = this.connectionsSecondLineValid(splitString[1]);
-    boolean thirdPlusLineValid = this.connectionsThirdPlusLinesValid(splitString);
 
-    return (firstLineValid && secondLineValid && thirdPlusLineValid);
+    return valid;
   }
 
   private boolean connectionsFirstLineValid(String firstLine) {
@@ -150,29 +174,26 @@ public class ValidateScore implements IGameVisitor<Boolean> {
 
   private boolean connectionsSecondLineValid(String secondLine) {
     // Second line is "Puzzle #[number]", minimum length is 9.
-    if (secondLine.length() < 9) {
-      return false;
+    boolean valid = secondLine.length() >= 9;
+
+    if (valid) {
+      // Static half will always be "Puzzle #".
+      String staticHalf = secondLine.substring(0, 8);
+      // Dynamic half will always be a non-negative number.
+      String dynamicHalf = secondLine.substring(8);
+
+      boolean staticValid = staticHalf.equals("Puzzle #");
+      boolean dynamicValid = isStringInteger(dynamicHalf) && Integer.parseInt(dynamicHalf) >= 0;
+
+      valid = staticValid && dynamicValid;
     }
 
-    // Static half will always be "Puzzle #".
-    String staticHalf = secondLine.substring(0, 8);
-    // Dynamic half will always be a non-negative number.
-    String dynamicHalf = secondLine.substring(8);
-
-    boolean staticValid = staticHalf.equals("Puzzle #");
-    boolean dynamicValid;
-
-    if (!isStringInteger(dynamicHalf)) {
-      return false;
-    } else {
-      int num = Integer.parseInt(dynamicHalf);
-      dynamicValid = num >= 0;
-    }
-
-    return staticValid && dynamicValid;
+    return valid;
   }
 
   private boolean connectionsThirdPlusLinesValid(String[] splitString) {
+    boolean valid = true;
+
     // Iterate through each line after the header to make sure they are scores.
     for (int lineNum = 2; lineNum < splitString.length; lineNum++) {
       // For yellow, green, blue, and purple squares the unicode is two single strings.
@@ -180,7 +201,8 @@ public class ValidateScore implements IGameVisitor<Boolean> {
       String line = splitString[lineNum];
 
       if (line.length() != 8) {
-        return false;
+        valid = false;
+        break;
       }
 
       // Iterate through each single string in the line.
@@ -193,26 +215,27 @@ public class ValidateScore implements IGameVisitor<Boolean> {
 
         // If both are not valid for each line, return false.
         if (!(firstValid && secondValid)) {
-          return false;
+          valid = false;
+          break;
         }
       }
     }
 
-    return true;
+    return valid;
   }
 
   @Override
   public Boolean visitMini(String score, boolean isLink) {
-    if (score == null) {
-      // Given String must not be null.
-      return false;
+    // Given String must not be null.
+    boolean valid = score != null;
+
+    if (valid && isLink) {
+      valid = this.validateMiniLink(score);
+    } else if (valid) {
+      valid = this.validateMiniNoLink(score);
     }
 
-    if (isLink) {
-      return this.validateMiniLink(score);
-    } else {
-      return this.validateMiniNoLink(score);
-    }
+    return valid;
   }
 
   private boolean validateMiniLink(String score) {
