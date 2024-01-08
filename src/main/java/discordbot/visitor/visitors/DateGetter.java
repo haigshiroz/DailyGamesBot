@@ -60,9 +60,10 @@ public class DateGetter implements IGameVisitor<Date> {
       // Follows MM/DD/YYYY.
       String[] splitScore = score.split(" ");
       String dateString = splitScore[3];
-      int month = Integer.parseInt(dateString.substring(0, 2));
-      int date = Integer.parseInt(dateString.substring(3, 5));
-      int year = Integer.parseInt(dateString.substring(6));
+      String[] dateSplit = dateString.split("/");
+      int month = Integer.parseInt(dateSplit[0]);
+      int date = Integer.parseInt(dateSplit[1]);
+      int year = Integer.parseInt(dateSplit[2]);
       Calendar cal = new GregorianCalendar(year, month - 1, date);
       returnDate = cal.getTime();
     }

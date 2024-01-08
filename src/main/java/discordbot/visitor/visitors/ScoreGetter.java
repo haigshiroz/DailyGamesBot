@@ -61,7 +61,7 @@ public class ScoreGetter implements IGameVisitor<String> {
         }
       }
 
-      return time + "seconds";
+      return time + " seconds";
     } else {
       String[] splitScore = score.split(" ");
       String time = splitScore[10];
