@@ -1,11 +1,42 @@
-package discordbot.game.visitor.visitors;
+package discordbot.visitor.visitors;
 
+/**
+ * Generic visitor interface that supports each type of game being visited.
+ *
+ * @param <T> Return type as a result of visiting each type of game.
+ */
 public interface IGameVisitor<T> {
-  T visitWordle(String score);
+  /**
+   * Visit Wordle.
+   *
+   * @param message String to be passed and analyzed.
+   * @return Generic type. Return depends on interface implementation.
+   */
+  T visitWordle(String message);
 
-  T visitConnections(String score);
+  /**
+   * Visit Connections.
+   *
+   * @param message String to be passed and analyzed.
+   * @return Generic type. Return depends on interface implementation.
+   */
 
-  T visitMini(String score, boolean isLink);
+  T visitConnections(String message);
 
-  T visitMurdle(String score);
+  /**
+   * Visit Mini.
+   *
+   * @param message String to be passed and analyzed.
+   * @param isLink  Whether the message contains a Mini link or not. True means it is a link.
+   * @return Generic type. Return depends on interface implementation.
+   */
+  T visitMini(String message, boolean isLink);
+
+  /**
+   * Visit Murdle.
+   *
+   * @param message String to be passed and analyzed.
+   * @return Generic type. Return depends on interface implementation.
+   */
+  T visitMurdle(String message);
 }

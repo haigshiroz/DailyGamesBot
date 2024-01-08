@@ -1,7 +1,7 @@
-package discordbot.game;
+package discordbot.data;
 
 /**
- * Represents the available Games support by DailyGamesBot.
+ * Represents the available Games supported by DailyGamesBot.
  */
 public enum GameType {
   WORDLE("Wordle"),
@@ -11,6 +11,11 @@ public enum GameType {
 
   private final String gameName;
 
+  /**
+   * Private constructor for a GameType.
+   *
+   * @param gameName The String representation of the game.
+   */
   GameType(String gameName) {
     this.gameName = gameName;
   }
@@ -22,7 +27,7 @@ public enum GameType {
 
   /**
    * Converts the given string to the corresponding GameType object.
-   * String must be one of the available GameTypes (case insensitive).
+   * String must be one of the available GameTypes (case-insensitive).
    *
    * @param gameString String to be converted to a GameType.
    * @return The corresponding GameType based off the given String.

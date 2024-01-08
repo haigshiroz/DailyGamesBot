@@ -1,5 +1,11 @@
-package discordbot.game.visitor.visitors;
+package discordbot.visitor.visitors;
 
+/**
+ * Implementation of the IGameVisitor class of type String.
+ * Precondition: Given String is already validated to be a copy-paste for the
+ * respective game.
+ * Obtains the score of each game (time, number of tries, accuracy, etc.) as a String.
+ */
 public class ScoreGetter implements IGameVisitor<String> {
   @Override
   public String visitWordle(String score) {

@@ -1,5 +1,9 @@
-package discordbot.game.visitor.visitors;
+package discordbot.visitor.visitors;
 
+/**
+ * Implementation of the IGameVisitor class of type Boolean.
+ * Checks whether each given message contains a valid copy-paste score for the game.
+ */
 public class ValidateScore implements IGameVisitor<Boolean> {
   @Override
   public Boolean visitWordle(String score) {

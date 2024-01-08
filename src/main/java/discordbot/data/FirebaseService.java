@@ -1,4 +1,4 @@
-package discordbot.game.data;
+package discordbot.data;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.Filter;
@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import discordbot.game.GameType;
-
+/**
+ * Class that contains methods that interacts with Firebase database such
+ * as saving, retrieving, and deleting data.
+ */
 public class FirebaseService {
   public static void saveScore(ScoreData data) throws ExecutionException, InterruptedException {
     // Add all the data to a Map (Firebase accepts Maps as data).
@@ -152,7 +154,7 @@ public class FirebaseService {
     // If the data is there, delete it. In theory, this should just be a list of size 1.
     if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
       dataFound = true;
-      for(QueryDocumentSnapshot qds : queryDocumentSnapshots) {
+      for (QueryDocumentSnapshot qds : queryDocumentSnapshots) {
         dataBase.collection("gameScores").document(qds.getId()).delete();
       }
     }

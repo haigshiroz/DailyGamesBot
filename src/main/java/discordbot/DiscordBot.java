@@ -17,7 +17,7 @@ import discordbot.commands.CompareCommand;
 import discordbot.commands.DeleteScoreCommand;
 import discordbot.commands.ScanMessages;
 import discordbot.commands.StoreGameChannelCommand;
-import discordbot.game.data.FirebaseInitializer;
+import discordbot.data.FirebaseInitializer;
 
 /**
  * Main class holder.
@@ -34,27 +34,30 @@ public class DiscordBot {
     Collection<GatewayIntent> intents = new ArrayList<>();
     intents.add(GatewayIntent.MESSAGE_CONTENT);
 
-    // Build bot object
-    //JDA bot = JDABuilder.createDefault(new String(Files.readAllBytes(Paths.get("src/main/resources/discordToken.txt"))))
-    JDA bot = JDABuilder.createDefault("MTE3MjMyODU3NTI5OTQ4NTc4Ng.Gp3QUe.o5pr8BZIg0oMs1cu_xbaCy1Qt3xQ4Bz7oBA8J4")
-            .setActivity(Activity.playing("Wordle"))
-            .addEventListeners(new StoreGameChannelCommand())
-            .addEventListeners(new ScanMessages())
-            .addEventListeners(new CompareCommand())
-            .addEventListeners(new DeleteScoreCommand())
-            .enableIntents(intents)
-            .build();
+    try {
+      // Build bot object
+      JDA bot = JDABuilder.createDefault(new String(Files.readAllBytes(Paths.get("src/main/resources/discordToken.txt"))))
+              .setActivity(Activity.playing("Wordle"))
+              .addEventListeners(new StoreGameChannelCommand())
+              .addEventListeners(new ScanMessages())
+              .addEventListeners(new CompareCommand())
+              .addEventListeners(new DeleteScoreCommand())
+              .enableIntents(intents)
+              .build();
 
-    // Add command options with name, description, and fields.
-    bot.updateCommands().addCommands(
-            Commands.slash("set-channel", "Sets the text channel where game statistics are stored")
-                    .addOption(OptionType.CHANNEL, "channel", "The dedicated game channel.", true),
-            Commands.slash("compare", "Shows how other players scored. Defaults to all scores for all games for today.")
-                    .addOption(OptionType.STRING, "game", "Specify the game being compared", false)
-                    .addOption(OptionType.STRING, "date", "Specify the date in the form of \"MM/DD/YYYY\"", false),
-            Commands.slash("delete-score", "Deletes a stored score from a given game and date.")
-                    .addOption(OptionType.STRING, "date", "The date the score was for in \"MM/DD/YYYY\".", true)
-                    .addOption(OptionType.STRING, "game", "The game the score was for.", true)
-    ).queue();
+      // Add command options with name, description, and fields.
+      bot.updateCommands().addCommands(
+              Commands.slash("set-channel", "Sets the text channel where game statistics are stored")
+                      .addOption(OptionType.CHANNEL, "channel", "The dedicated game channel.", true),
+              Commands.slash("compare", "Shows how other players scored. Defaults to all scores for all games for today.")
+                      .addOption(OptionType.STRING, "game", "Specify the game being compared", false)
+                      .addOption(OptionType.STRING, "date", "Specify the date in the form of \"MM/DD/YYYY\"", false),
+              Commands.slash("delete-score", "Deletes a stored score from a given game and date.")
+                      .addOption(OptionType.STRING, "date", "The date the score was for in \"MM/DD/YYYY\".", true)
+                      .addOption(OptionType.STRING, "game", "The game the score was for.", true)
+      ).queue();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }

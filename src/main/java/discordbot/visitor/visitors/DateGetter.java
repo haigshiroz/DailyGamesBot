@@ -1,4 +1,4 @@
-package discordbot.game.visitor.visitors;
+package discordbot.visitor.visitors;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -6,8 +6,9 @@ import java.util.GregorianCalendar;
 
 /**
  * A class that implements the IGameVisitor that returns the date of the game that was
- * submitted, assuming that the game is already validated.
- * Dates follow the pattern of MM/DD/YYYY.
+ * submitted as a type Date.
+ * Precondition: Given String is already validated to be a copy-paste for the
+ * respective game.
  */
 public class DateGetter implements IGameVisitor<Date> {
   @Override
@@ -51,7 +52,7 @@ public class DateGetter implements IGameVisitor<Date> {
       int year = Integer.parseInt(score.substring(49, 53));
       int month = Integer.parseInt(score.substring(54, 56));
       int date = Integer.parseInt(score.substring(57, 59));
-      Calendar cal = new GregorianCalendar(year, month-1, date);
+      Calendar cal = new GregorianCalendar(year, month - 1, date);
       returnDate = cal.getTime();
 
     } else {
@@ -62,7 +63,7 @@ public class DateGetter implements IGameVisitor<Date> {
       int month = Integer.parseInt(dateString.substring(0, 2));
       int date = Integer.parseInt(dateString.substring(3, 5));
       int year = Integer.parseInt(dateString.substring(6));
-      Calendar cal = new GregorianCalendar(year, month-1, date);
+      Calendar cal = new GregorianCalendar(year, month - 1, date);
       returnDate = cal.getTime();
     }
 
@@ -78,7 +79,7 @@ public class DateGetter implements IGameVisitor<Date> {
     int month = Integer.parseInt(dateStringSplit[0]);
     int date = Integer.parseInt(dateStringSplit[1]);
     int year = Integer.parseInt(dateStringSplit[2]);
-    Calendar cal = new GregorianCalendar(year, month-1, date);
+    Calendar cal = new GregorianCalendar(year, month - 1, date);
     return cal.getTime();
   }
 }
