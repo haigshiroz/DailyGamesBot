@@ -47,7 +47,7 @@ public class DiscordBot {
 
       // Add command options with name, description, and fields.
       bot.updateCommands().addCommands(
-              Commands.slash("set-channel", "Sets the text channel where game statistics are stored")
+              Commands.slash("set-channel", "Sets the text channel where game scores are stored")
                       .addOption(OptionType.CHANNEL, "channel", "The dedicated game channel.", true),
               Commands.slash("compare", "Shows how other players scored. Defaults to all scores for all games for today.")
                       .addOption(OptionType.STRING, "game", "Specify the game being compared", false)
