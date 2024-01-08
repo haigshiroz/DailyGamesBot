@@ -13,17 +13,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import discordbot.game.GameType;
-import discordbot.game.data.FirebaseService;
-import discordbot.game.data.ScoreData;
-import discordbot.game.visitor.games.Connections;
-import discordbot.game.visitor.games.IGame;
-import discordbot.game.visitor.games.Mini;
-import discordbot.game.visitor.games.Murdle;
-import discordbot.game.visitor.games.Wordle;
-import discordbot.game.visitor.visitors.DateGetter;
-import discordbot.game.visitor.visitors.ScoreGetter;
-import discordbot.game.visitor.visitors.ValidateScore;
+import discordbot.data.GameType;
+import discordbot.data.FirebaseService;
+import discordbot.data.ScoreData;
+import discordbot.visitor.games.Connections;
+import discordbot.visitor.games.IGame;
+import discordbot.visitor.games.Mini;
+import discordbot.visitor.games.Murdle;
+import discordbot.visitor.games.Wordle;
+import discordbot.visitor.visitors.DateGetter;
+import discordbot.visitor.visitors.ScoreGetter;
+import discordbot.visitor.visitors.ValidateScore;
 
 public class ScanMessages extends ListenerAdapter {
   @Override

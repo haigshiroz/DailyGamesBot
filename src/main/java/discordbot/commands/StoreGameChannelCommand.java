@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 import java.util.concurrent.ExecutionException;
 
-import discordbot.game.data.FirebaseService;
+import discordbot.data.FirebaseService;
 
 public class StoreGameChannelCommand extends ListenerAdapter {
   @Override

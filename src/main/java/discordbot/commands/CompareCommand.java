@@ -9,9 +9,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import discordbot.game.GameType;
-import discordbot.game.data.FirebaseService;
-import discordbot.game.visitor.visitors.ValidateScore;
+import discordbot.data.GameType;
+import discordbot.data.FirebaseService;
+import discordbot.visitor.visitors.ValidateScore;
 
 public class CompareCommand extends ListenerAdapter {
   @Override

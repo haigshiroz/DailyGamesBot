@@ -7,10 +7,10 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import discordbot.game.GameType;
-import discordbot.game.data.FirebaseService;
-import discordbot.game.data.ScoreData;
-import discordbot.game.visitor.visitors.ValidateScore;
+import discordbot.data.GameType;
+import discordbot.data.FirebaseService;
+import discordbot.data.ScoreData;
+import discordbot.visitor.visitors.ValidateScore;
 
 public class DeleteScoreCommand extends ListenerAdapter {
   @Override
